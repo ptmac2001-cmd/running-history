@@ -80,16 +80,26 @@ class NikeImporter(BaseImporter):
         return result
 
 
+_NIKE_TYPE_MAP = {
+    "RUN": "run",
+    "GUIDED_RUN": "run",
+    "TRAIL_RUN": "trail_run",
+    "TREADMILL": "treadmill",
+    "RIDE": "bike",
+    "SWIM": "swim",
+    "WALK": "walk",
+    "HIKE": "hike",
+    "YOGA": "yoga",
+    "STRENGTH": "strength",
+}
+
+def _nike_type(raw: str) -> str:
+    return _NIKE_TYPE_MAP.get(raw.upper(), raw.lower() or "other")
+
+
 def _parse_activity(raw: dict, source: str) -> NormalizedActivity | None:
     activity_type_raw = raw.get("type", "").upper()
-    if activity_type_raw not in ("RUN", "GUIDED_RUN", "TRAIL_RUN", "TREADMILL"):
-        return None
-
-    activity_type = "run"
-    if "TREADMILL" in activity_type_raw:
-        activity_type = "treadmill"
-    elif "TRAIL" in activity_type_raw:
-        activity_type = "trail_run"
+    activity_type = _nike_type(activity_type_raw)
 
     start_epoch_ms = raw.get("startEpochMs")
     if not start_epoch_ms:

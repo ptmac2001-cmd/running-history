@@ -8,6 +8,28 @@ from ingestion.base import NormalizedActivity, NormalizedRoutePoint, NormalizedL
 _FIT_EPOCH_OFFSET = 631065600  # seconds between Unix epoch and FIT epoch
 _SEMICIRCLE_FACTOR = 180.0 / (2 ** 31)
 
+_FIT_SPORT_MAP = {
+    "running": "run",
+    "trail_running": "trail_run",
+    "treadmill": "treadmill",
+    "cycling": "bike",
+    "biking": "bike",
+    "mountain_biking": "bike",
+    "swimming": "swim",
+    "open_water_swimming": "swim",
+    "walking": "walk",
+    "hiking": "hike",
+    "kayaking": "kayak",
+    "paddling": "kayak",
+    "rowing": "row",
+    "yoga": "yoga",
+    "strength_training": "strength",
+    "cardio": "cardio",
+}
+
+def _fit_sport_to_type(sport: str) -> str:
+    return _FIT_SPORT_MAP.get(sport, sport or "other")
+
 
 def semicircles_to_degrees(value: int) -> float:
     return value * _SEMICIRCLE_FACTOR
@@ -132,11 +154,7 @@ def parse_fit_file(path: Path, source: str) -> NormalizedActivity | None:
         return None
 
     sport = str(session_data.get("sport", "running")).lower()
-    activity_type = "run"
-    if sport in ("cycling", "biking"):
-        activity_type = "cycling"
-    elif sport == "swimming":
-        activity_type = "swimming"
+    activity_type = _fit_sport_to_type(sport)
 
     avg_speed = session_data.get("avg_speed")
     max_speed = session_data.get("max_speed")

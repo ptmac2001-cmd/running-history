@@ -12,6 +12,34 @@ from utils.gpx_parser import parse_gpx_file
 from utils.fit_parser import parse_fit_file
 
 
+_STRAVA_TYPE_MAP = {
+    "run": "run",
+    "trail run": "trail_run",
+    "treadmill run": "treadmill",
+    "virtual run": "run",
+    "race": "race",
+    "ride": "bike",
+    "virtual ride": "bike",
+    "mountain bike ride": "bike",
+    "gravel ride": "bike",
+    "e-bike ride": "bike",
+    "swim": "swim",
+    "open water swim": "swim",
+    "walk": "walk",
+    "hike": "hike",
+    "kayaking": "kayak",
+    "canoeing": "kayak",
+    "rowing": "row",
+    "yoga": "yoga",
+    "workout": "workout",
+    "weight training": "strength",
+    "crossfit": "strength",
+}
+
+def _strava_type(raw: str) -> str:
+    return _STRAVA_TYPE_MAP.get(raw.lower(), raw.lower() or "other")
+
+
 class StravaImporter(BaseImporter):
     source_name = "strava"
 
@@ -59,14 +87,7 @@ class StravaImporter(BaseImporter):
 
 def _parse_row(row: dict, activities_dir: Path, source: str):
     activity_type_raw = row.get("Activity Type", "").strip().lower()
-    if activity_type_raw not in ("run", "trail run", "treadmill run", "virtual run", "race"):
-        return None
-
-    activity_type = "run"
-    if "treadmill" in activity_type_raw:
-        activity_type = "treadmill"
-    elif "trail" in activity_type_raw:
-        activity_type = "trail_run"
+    activity_type = _strava_type(activity_type_raw)
 
     date_str = row.get("Activity Date", "").strip()
     if not date_str:

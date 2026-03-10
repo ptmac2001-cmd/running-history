@@ -18,9 +18,6 @@ router = APIRouter()
 _STRAVA_TOKEN_URL = "https://www.strava.com/oauth/token"
 _STRAVA_API = "https://www.strava.com/api/v3"
 
-_RUN_TYPES = {"run", "trail run", "treadmill", "virtualrun", "race"}
-
-
 def _get_access_token(db: Session) -> str:
     token = db.query(OAuthToken).filter_by(provider="strava").first()
     if not token:
@@ -84,7 +81,7 @@ def sync_strava(db: Session = Depends(get_db)):
         for strava_activity in activities:
             try:
                 type_str = str(strava_activity.get("sport_type") or strava_activity.get("type") or "").lower()
-                if "run" not in type_str:
+                if not type_str:
                     continue
                 activity = _normalize(strava_activity, access_token)
                 _, status = insert_activity(activity, db)
@@ -107,12 +104,8 @@ def sync_strava(db: Session = Depends(get_db)):
 
 def _normalize(a: dict, access_token: str) -> NormalizedActivity:
     type_str = str(a.get("sport_type") or a.get("type") or "").lower()
-    if "treadmill" in type_str:
-        activity_type = "treadmill"
-    elif "trail" in type_str:
-        activity_type = "trail_run"
-    else:
-        activity_type = "run"
+    from ingestion.strava import _strava_type
+    activity_type = _strava_type(type_str)
 
     elapsed = a.get("elapsed_time") or 0
     duration_seconds = int(elapsed)

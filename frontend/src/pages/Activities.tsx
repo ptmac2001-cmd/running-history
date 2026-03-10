@@ -45,7 +45,7 @@ export function Activities() {
           onChange={(e) => setFilters({ ...filters, activity_type: e.target.value || undefined, page: 1 })}
         >
           <option value="">All types</option>
-          {['run', 'trail_run', 'treadmill', 'race'].map((t) => (
+          {['run', 'trail_run', 'treadmill', 'race', 'bike', 'swim', 'walk', 'hike', 'kayak', 'row', 'yoga', 'strength', 'workout', 'other'].map((t) => (
             <option key={t} value={t}>{t}</option>
           ))}
         </select>

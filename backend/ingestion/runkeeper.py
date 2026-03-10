@@ -72,12 +72,29 @@ def _parse_duration(duration_str: str) -> int | None:
     return None
 
 
+_RUNKEEPER_TYPE_MAP = {
+    "running": "run",
+    "trail running": "trail_run",
+    "treadmill running": "treadmill",
+    "cycling": "bike",
+    "mountain biking": "bike",
+    "swimming": "swim",
+    "walking": "walk",
+    "hiking": "hike",
+    "kayaking": "kayak",
+    "rowing": "row",
+    "yoga": "yoga",
+}
+
+def _runkeeper_type(raw: str) -> str:
+    return _RUNKEEPER_TYPE_MAP.get(raw.lower(), raw.lower() or "other")
+
+
 def _parse_row(row: dict, csv_dir: Path, source: str):
     from ingestion.base import NormalizedActivity
 
     activity_type_raw = row.get("Type", "Running").strip().lower()
-    if "run" not in activity_type_raw:
-        return None  # skip non-runs
+    activity_type = _runkeeper_type(activity_type_raw)
 
     date_str = row.get("Date", "").strip()
     if not date_str:
@@ -122,7 +139,7 @@ def _parse_row(row: dict, csv_dir: Path, source: str):
         "start_time": start_time,
         "duration_seconds": duration,
         "distance_meters": distance_m,
-        "activity_type": "run",
+        "activity_type": activity_type,
         "elevation_gain_meters": elevation_gain,
         "avg_heart_rate": avg_hr,
         "calories": calories,
@@ -141,7 +158,7 @@ def _parse_row(row: dict, csv_dir: Path, source: str):
         start_time=start_time,
         duration_seconds=duration or 0,
         distance_meters=distance_m,
-        activity_type="run",
+        activity_type=activity_type,
         elevation_gain_meters=elevation_gain,
         avg_heart_rate=avg_hr,
         calories=calories,

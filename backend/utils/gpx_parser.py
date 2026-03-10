@@ -120,7 +120,16 @@ def parse_tcx_file(path: Path, source: str) -> NormalizedActivity | None:
 
     act_el = activities_el[0]
     sport = act_el.get("Sport", "Running").lower()
-    activity_type = "run" if "run" in sport else sport
+    _TCX_SPORT_MAP = {
+        "running": "run",
+        "biking": "bike",
+        "cycling": "bike",
+        "swimming": "swim",
+        "walking": "walk",
+        "hiking": "hike",
+        "other": "other",
+    }
+    activity_type = _TCX_SPORT_MAP.get(sport, sport or "other")
 
     route_points: list[NormalizedRoutePoint] = []
     sequence = 0
