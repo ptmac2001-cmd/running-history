@@ -1,0 +1,15 @@
+data/raw/
+data/*.db
+.env
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+node_modules/
+frontend/dist/
+.DS_Store
+.env.txt
+data/*.db-shm
+data/*.db-wal
